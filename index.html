@@ -3,20 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner</title>
+    <title>Pandora Aydınlatma | Barcode Scanner</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
-        h2 { margin-bottom: 20px; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); max-width: 500px; margin: auto; }
+        .container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            max-width: 500px; 
+            margin: auto; 
+        }
+        h2 { margin-bottom: 20px; color: #333; }
         #scanner { width: 100%; max-width: 400px; margin: auto; display: none; }
-        #result, #product-info, #product-image { margin-top: 20px; font-size: 18px; font-weight: bold; }
-        button { padding: 12px 20px; font-size: 16px; cursor: pointer; margin: 10px; border: none; border-radius: 5px; }
+        #result, #product-info { 
+            margin-top: 15px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #444; 
+        }
+        button { 
+            padding: 12px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin: 10px; 
+            border: none; 
+            border-radius: 5px; 
+            transition: 0.3s;
+        }
         .btn-start { background: #28a745; color: white; }
+        .btn-start:hover { background: #218838; }
         .btn-stop { background: #dc3545; color: white; display: none; }
+        .btn-stop:hover { background: #c82333; }
         .btn-reset { background: #007bff; color: white; display: none; }
-        #product-image img { max-width: 100%; height: auto; margin-top: 10px; border-radius: 5px; display: none; }
+        .btn-reset:hover { background: #0056b3; }
+        #product-image img { 
+            max-width: 200px; 
+            height: auto; 
+            margin-top: 10px; 
+            border-radius: 5px; 
+            display: none; 
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -87,10 +117,12 @@
                     let rows = data.split("\n");
                     for (let i = 1; i < rows.length; i++) {
                         let cols = rows[i].split(";");
+
                         if (cols[0].trim() === barcode.trim()) {
                             document.getElementById("product-info").innerText = 
                                 `Ürün: ${cols[1]}, Ölçü: ${cols[2]}, Ampül: ${cols[4]}, DiscFiyat: ${cols[6]}, Fiyat: ${cols[7]}`;
-                            let imageUrl = `${barcode}.jpg`;
+
+                            let imageUrl = `${barcode}.jpg`; 
                             document.getElementById("barcode-image").src = imageUrl;
                             document.getElementById("barcode-image").style.display = "block";
                             return;
