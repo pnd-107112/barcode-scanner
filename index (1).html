@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        h2 { margin-bottom: 20px; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); max-width: 500px; margin: auto; }
+        #scanner { width: 100%; max-width: 400px; margin: auto; display: none; }
+        #result, #product-info, #product-image { margin-top: 20px; font-size: 18px; font-weight: bold; }
+        button { padding: 12px 20px; font-size: 16px; cursor: pointer; margin: 10px; border: none; border-radius: 5px; }
+        .btn-start { background: #28a745; color: white; }
+        .btn-stop { background: #dc3545; color: white; display: none; }
+        .btn-reset { background: #007bff; color: white; display: none; }
+        #product-image img { max-width: 100%; height: auto; margin-top: 10px; border-radius: 5px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Pandora Aydınlatma Barkod Tarama</h2>
+        <button id="start-btn" class="btn-start">Taramayı Başlat</button>
+        <button id="stop-btn" class="btn-stop">Taramayı Durdur</button>
+        <button id="reset-btn" class="btn-reset">Sıfırla</button>
+        <div id="scanner"></div>
+        <p id="result">Tarama sonucu: <span id="barcode"></span></p>
+        <p id="product-info"></p>
+        <div id="product-image"><img id="barcode-image" src="" alt="Ürün Resmi"></div>
+    </div>
+
+    <script>
+        let scanner;
+        let scanning = false;
+
+        document.getElementById("start-btn").addEventListener("click", function() {
+            if (!scanning) {
+                scanner = new Html5Qrcode("scanner");
+                scanner.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanError
+                );
+                scanning = true;
+                document.getElementById("scanner").style.display = "block";
+                document.getElementById("start-btn").style.display = "none";
+                document.getElementById("stop-btn").style.display = "inline-block";
+                document.getElementById("reset-btn").style.display = "inline-block";
+            }
+        });
+
+        document.getElementById("stop-btn").addEventListener("click", function() {
+            if (scanning) {
+                scanner.stop().then(() => {
+                    scanning = false;
+                    document.getElementById("scanner").style.display = "none";
+                    document.getElementById("start-btn").style.display = "inline-block";
+                    document.getElementById("stop-btn").style.display = "none";
+                }).catch(err => console.error("Stop failed:", err));
+            }
+        });
+
+        document.getElementById("reset-btn").addEventListener("click", function() {
+            document.getElementById("barcode").innerText = "";
+            document.getElementById("product-info").innerText = "";
+            document.getElementById("barcode-image").style.display = "none";
+            document.getElementById("reset-btn").style.display = "none";
+        });
+
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById("barcode").innerText = decodedText;
+            fetchProductDetails(decodedText);
+            document.getElementById("reset-btn").style.display = "inline-block";
+        }
+
+        function onScanError(errorMessage) {
+            console.warn("Scan error:", errorMessage);
+        }
+
+        function fetchProductDetails(barcode) {
+            fetch("product.csv")
+                .then(response => response.text())
+                .then(data => {
+                    let rows = data.split("\n");
+                    for (let i = 1; i < rows.length; i++) {
+                        let cols = rows[i].split(";");
+                        if (cols[0].trim() === barcode.trim()) {
+                            document.getElementById("product-info").innerText = 
+                                `Ürün: ${cols[1]}, Ölçü: ${cols[2]}, DiscFiyat: ${cols[3]}, Fiyat: ${cols[4]}`;
+                            let imageUrl = `${barcode}.jpg`;
+                            document.getElementById("barcode-image").src = imageUrl;
+                            document.getElementById("barcode-image").style.display = "block";
+                            return;
+                        }
+                    }
+                    document.getElementById("product-info").innerText = "Ürün bulunamadı!";
+                    document.getElementById("barcode-image").style.display = "none";
+                })
+                .catch(error => console.error("Error loading CSV:", error));
+        }
+    </script>
+</body>
+</html>
