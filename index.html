@@ -1,92 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pandora Aydınlatma | Barkod Tarama</title>
+    <title>Barcode Scanner</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { 
-            background: #f9f9f9; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            padding: 20px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        h2 { margin-bottom: 20px; }
         .container { 
             background: white; 
-            padding: 25px; 
-            border-radius: 12px; 
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1); 
-            max-width: 400px; 
-            width: 100%; 
-            text-align: center; 
-        }
-        h2 { 
-            color: #333; 
-            margin-bottom: 15px; 
-            font-weight: 600; 
-        }
-        #scanner { 
-            width: 100%; 
-            max-width: 320px; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            max-width: 500px; 
             margin: auto; 
-            display: none; 
-            border-radius: 8px;
-            overflow: hidden;
         }
-        p { color: #444; font-size: 14px; margin-top: 10px; }
+        #scanner { width: 100%; max-width: 400px; margin: auto; display: none; }
+        #result, #product-info, #product-image { margin-top: 20px; font-size: 18px; font-weight: bold; }
         button { 
-            padding: 12px 18px; 
-            font-size: 15px; 
-            border: none; 
-            border-radius: 8px; 
-            margin: 8px; 
+            padding: 12px 20px; 
+            font-size: 16px; 
             cursor: pointer; 
-            transition: all 0.3s ease; 
-            font-weight: 500;
+            margin: 10px; 
+            border: none; 
+            border-radius: 5px; 
         }
-        .btn-start { background: #4CAF50; color: white; }
-        .btn-start:hover { background: #45a049; }
-        .btn-stop { background: #e74c3c; color: white; display: none; }
-        .btn-stop:hover { background: #c0392b; }
-        .btn-reset { background: #3498db; color: white; display: none; }
-        .btn-reset:hover { background: #2980b9; }
-        .product-container { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 12px; 
-            margin-top: 15px;
-            padding: 10px; 
-            border-radius: 8px; 
-            background: #f7f7f7;
-        }
+        .btn-start { background: #28a745; color: white; }
+        .btn-stop { background: #dc3545; color: white; display: none; }
+        .btn-reset { background: #007bff; color: white; display: none; }
         #product-image img { 
-            max-width: 120px; 
+            max-width: 150px; /* Smaller image size */
             height: auto; 
-            border-radius: 8px; 
+            margin-top: 10px; 
+            border-radius: 5px; 
             display: none; 
-            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ddd;
+            padding: 5px;
         }
-        #result { font-weight: bold; margin-top: 12px; font-size: 16px; }
-        #product-info { font-size: 14px; color: #555; }
+        #product-info { 
+            text-align: left; 
+            padding: 10px; 
+            border-radius: 5px; 
+            background: #f9f9f9; 
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📸 Barkod Tarama</h2>
-        <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
-        <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
-        <button id="reset-btn" class="btn-reset">🔄 Sıfırla</button>
+        <h2>Pandora Aydınlatma Barkod Tarama</h2>
+        <button id="start-btn" class="btn-start">Taramayı Başlat</button>
+        <button id="stop-btn" class="btn-stop">Taramayı Durdur</button>
+        <button id="reset-btn" class="btn-reset">Sıfırla</button>
         <div id="scanner"></div>
-        <p id="result">Tarama Sonucu: <span id="barcode"></span></p>
-        <div class="product-container">
-            <div id="product-image"><img id="barcode-image" src="" alt="Ürün Resmi"></div>
-            <p id="product-info"></p>
-        </div>
+        <p id="result">Tarama sonucu: <span id="barcode"></span></p>
+        <p id="product-info"></p>
+        <div id="product-image"><img id="barcode-image" src="" alt="Ürün Resmi"></div>
     </div>
 
     <script>
@@ -147,8 +118,12 @@
                         let cols = rows[i].split(";");
 
                         if (cols[0].trim() === barcode.trim()) {
-                            document.getElementById("product-info").innerText = 
-                                `📦 Ürün: ${cols[1]} | 📏 Ölçü: ${cols[2]} | 💡 Ampül: ${cols[4]} | 💰 Fiyat: ${cols[7]}₺`;
+                            document.getElementById("product-info").innerHTML = `
+                                <strong>📦 Ürün:</strong> ${cols[1]} <br>
+                                <strong>📏 Ölçü:</strong> ${cols[2]} <br>
+                                <strong>💡 Ampül:</strong> ${cols[4]} <br>
+                                <strong>💰 Fiyat:</strong> ${cols[7]}₺ <br>
+                            `;
 
                             let imageUrl = `${barcode}.jpg`; 
                             document.getElementById("barcode-image").src = imageUrl;
@@ -156,7 +131,7 @@
                             return;
                         }
                     }
-                    document.getElementById("product-info").innerText = "⚠ Ürün bulunamadı!";
+                    document.getElementById("product-info").innerHTML = "<strong>⚠ Ürün bulunamadı!</strong>";
                     document.getElementById("barcode-image").style.display = "none";
                 })
                 .catch(error => console.error("Error loading CSV:", error));
