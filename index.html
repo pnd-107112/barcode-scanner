@@ -89,7 +89,7 @@
                         let cols = rows[i].split(";");
                         if (cols[0].trim() === barcode.trim()) {
                             document.getElementById("product-info").innerText = 
-                                `Ürün: ${cols[1]}, Ölçü: ${cols[2]}, DiscFiyat: ${cols[3]}, Fiyat: ${cols[4]}`;
+                                `Ürün: ${cols[1]}, Ölçü: ${cols[2]}, Ampül: ${cols[4]}, DiscFiyat: ${cols[6]}, Fiyat: ${cols[7]}`;
                             let imageUrl = `${barcode}.jpg`;
                             document.getElementById("barcode-image").src = imageUrl;
                             document.getElementById("barcode-image").style.display = "block";
