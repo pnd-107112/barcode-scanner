@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pandora Aydınlatma | Barkod Tarama</title>
+    <link rel="icon" type="" href="logo.JPG">
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -73,11 +74,47 @@
         }
         #result { font-weight: bold; margin-top: 12px; font-size: 16px; }
         #product-info { font-size: 14px; color: #555; }
+
+        /* Hesap Makinesi */
+        #calculator {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        #calculator input, #calculator button {
+            width: 50%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .btn-calculate {
+            background: #ff9800;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-calculate:hover {
+            background: #e68900;
+        }
+        .btn-close-calc {
+            background: #777;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-close-calc:hover {
+            background: #555;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📸 Pandora Barkod Tarama</h2>
+        <img src="logo.JPG" alt="Pandora Aydınlatma Logo" style="max-width: 50px; display: block; margin: 0 auto 15px;">
+        <h2>📸 Pandora Avize Tarama</h2>
         <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
         <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
         <button id="reset-btn" class="btn-reset">🔄 Sıfırla</button>
@@ -87,6 +124,18 @@
             <div id="product-image"><img id="barcode-image" src="" alt="Ürün Resmi"></div>
             <p id="product-info"></p>
         </div>
+
+        <!-- Hesap Makinesi Gizli Başlangıç -->
+        <button id="show-calculator" class="btn-start">💰 İndirim Hesapla</button>
+        <div id="calculator">
+            <input type="number" id="discount-rate" placeholder="Yüzde gir (%)">
+            <input type="number" id="original-price" placeholder="Fiyat gir (₺)">
+            <button class="btn-calculate" onclick="calculateDiscount()">Hesapla</button>
+            <button class="btn-close-calc" onclick="closeCalculator()">Kapat</button>
+            <p><strong>İndirimli Fiyat:</strong> <span id="discounted-price">0</span> ₺</p>
+        </div>
+        <!-- Hesap Makinesi Gizli Bitiş -->
+
     </div>
 
     <script>
@@ -139,33 +188,57 @@
         }
 
         function fetchProductDetails(barcode) {
-    fetch("product.csv")
-        .then(response => response.text())
-        .then(data => {
-            let rows = data.split("\n");
-            for (let i = 1; i < rows.length; i++) {
-                let cols = rows[i].split(";");
+            fetch("product.csv")
+                .then(response => response.text())
+                .then(data => {
+                    let rows = data.split("\n");
+                    for (let i = 1; i < rows.length; i++) {
+                        let cols = rows[i].split(";");
 
-                if (cols[0].trim() === barcode.trim()) {
-                    document.getElementById("product-info").innerHTML = `
-                        📦 <strong>Ürün:</strong> ${cols[1]} <br>
-                        📏 <strong>Ölçü:</strong> ${cols[2]} <br>
-                        💡 <strong>Ampül:</strong> ${cols[4]} <br>
-                        💰 <strong>dip.fiyat:</strong> ${cols[6]}₺ <br>
-                        💰 <strong>Fiyat:</strong> ${cols[7]}₺ <br>
-                    `;
+                        if (cols[0].trim() === barcode.trim()) {
+                            document.getElementById("product-info").innerHTML = `
+                                📦 <strong>Ürün:</strong> ${cols[1]} <br>
+                                📏 <strong>Ölçü:</strong> ${cols[2]} <br>
+                                💡 <strong>Ampül:</strong> ${cols[4]} <br>
+                                💰 <strong>Dip.fiyat:</strong> ${cols[6]}₺ <br>
+                                💰 <strong>Fiyat:</strong> ${cols[7]}₺ <br>
+                            `;
 
-                    let imageUrl = `${barcode}.jpg`; 
-                    document.getElementById("barcode-image").src = imageUrl;
-                    document.getElementById("barcode-image").style.display = "block";
-                    return;
-                }
+                            let imageUrl = `${barcode}.jpg`; 
+                            document.getElementById("barcode-image").src = imageUrl;
+                            document.getElementById("barcode-image").style.display = "block";
+                            return;
+                        }
+                    }
+                    document.getElementById("product-info").innerText = "⚠ Ürün bulunamadı!";
+                    document.getElementById("barcode-image").style.display = "none";
+                })
+                .catch(error => console.error("Error loading CSV:", error));
+        }
+
+        // İndirim hesaplama
+        function calculateDiscount() {
+            let rate = parseFloat(document.getElementById("discount-rate").value);
+            let price = parseFloat(document.getElementById("original-price").value);
+
+            if (isNaN(rate) || isNaN(price) || rate < 0 || rate > 100 || price < 0) {
+                alert("Lütfen geçerli bir yüzde ve fiyat girin!");
+                return;
             }
-            document.getElementById("product-info").innerText = "⚠ Ürün bulunamadı!";
-            document.getElementById("barcode-image").style.display = "none";
-        })
-        .catch(error => console.error("Error loading CSV:", error));
-}
+
+            let discountedPrice = price - (price * (rate / 100));
+            document.getElementById("discounted-price").innerText = discountedPrice.toFixed(2);
+        }
+
+        // Hesap makinesini kapatma
+        function closeCalculator() {
+            document.getElementById("calculator").style.display = "none";
+        }
+
+        // Hesap makinesini gösterme
+        document.getElementById("show-calculator").addEventListener("click", function() {
+            document.getElementById("calculator").style.display = "block";
+        });
     </script>
 </body>
 </html>
