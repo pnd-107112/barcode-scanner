@@ -33,27 +33,10 @@
             width: 100%; 
             max-width: 320px; 
             margin: auto; 
-            display: none; 
             border-radius: 8px;
             overflow: hidden;
         }
         p { color: #444; font-size: 14px; margin-top: 10px; }
-        button { 
-            padding: 12px 18px; 
-            font-size: 15px; 
-            border: none; 
-            border-radius: 8px; 
-            margin: 8px; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            font-weight: 500;
-        }
-        .btn-start { background: #4CAF50; color: white; }
-        .btn-start:hover { background: #45a049; }
-        .btn-stop { background: #e74c3c; color: white; display: none; }
-        .btn-stop:hover { background: #c0392b; }
-        .btn-reset { background: #3498db; color: white; display: none; }
-        .btn-reset:hover { background: #2980b9; }
         .product-container { 
             display: flex; 
             align-items: center; 
@@ -78,9 +61,6 @@
 <body>
     <div class="container">
         <h2>📸 Pandora Barkod Tarama</h2>
-        <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
-        <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
-        <button id="reset-btn" class="btn-reset">🔄 Sıfırla</button>
         <div id="scanner"></div>
         <p id="result">Tarama Sonucu: <span id="barcode"></span></p>
         <div class="product-container">
@@ -90,10 +70,10 @@
     </div>
 
     <script>
-        let scanner = new Html5Qrcode("scanner"); // Scanner nesnesi sadece bir kere oluşturuluyor
+        let scanner = new Html5Qrcode("scanner"); // Scanner nesnesi oluştur
         let scanning = false;
 
-        document.getElementById("start-btn").addEventListener("click", function() {
+        function startScanner() {
             if (!scanning) {
                 scanner.start(
                     { facingMode: "environment" }, 
@@ -103,37 +83,12 @@
                 ).catch(err => console.error("Scanner başlatılamadı:", err));
 
                 scanning = true;
-                document.getElementById("scanner").style.display = "block";
-                document.getElementById("start-btn").style.display = "none";
-                document.getElementById("stop-btn").style.display = "inline-block";
-                document.getElementById("reset-btn").style.display = "inline-block";
             }
-        });
-
-        document.getElementById("stop-btn").addEventListener("click", function() {
-            if (scanning) {
-                scanner.stop()
-                    .catch(err => console.error("Stop failed:", err))
-                    .finally(() => {
-                        scanning = false;
-                        document.getElementById("scanner").style.display = "none";
-                        document.getElementById("start-btn").style.display = "inline-block";
-                        document.getElementById("stop-btn").style.display = "none";
-                    });
-            }
-        });
-
-        document.getElementById("reset-btn").addEventListener("click", function() {
-            document.getElementById("barcode").innerText = "";
-            document.getElementById("product-info").innerText = "";
-            document.getElementById("barcode-image").style.display = "none";
-            document.getElementById("reset-btn").style.display = "none";
-        });
+        }
 
         function onScanSuccess(decodedText) {
             document.getElementById("barcode").innerText = decodedText;
             fetchProductDetails(decodedText);
-            document.getElementById("reset-btn").style.display = "inline-block";
         }
 
         function onScanError(errorMessage) {
@@ -168,6 +123,9 @@
                 })
                 .catch(error => console.error("Error loading CSV:", error));
         }
+
+        // Sayfa açıldığında otomatik başlat
+        window.onload = startScanner;
     </script>
 </body>
 </html>
