@@ -1,20 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pandora Aydınlatma | Barkod Tarama</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Stil kısmı aynı kalabilir */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ece9e6, #ffffff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-start {
+            background: #1abc9c;
+        }
+        .btn-start:hover {
+            background: #16a085;
+        }
+
+        .btn-stop {
+            background: #e74c3c;
+            display: none;
+        }
+        .btn-stop:hover {
+            background: #c0392b;
+        }
+
+        .btn-reset {
+            background: #3498db;
+            display: none;
+        }
+        .btn-reset:hover {
+            background: #2980b9;
+        }
+
+        #scanner {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto 20px;
+            display: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #result {
+            font-size: 16px;
+            color: #2c3e50;
+            margin: 15px 0;
+        }
+
+        #barcode {
+            font-weight: 600;
+            color: #e67e22;
+        }
+
+        .product-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .product-container:hover {
+            background: #ecf0f1;
+        }
+
+        #product-image img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #product-info {
+            font-size: 14px;
+            color: #34495e;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        #product-info strong {
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>📸 Pandora Barkod Tarama</h2>
-        <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
-        <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
-        <button id="reset-btn" class="btn-reset">🔄 Sıfırla</button>
+        <div class="button-group">
+            <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
+            <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
+            <button id="reset-btn" class="btn-reset">🔄 Yeniden Başlat</button>
+        </div>
         <div id="scanner"></div>
         <p id="result">Tarama Sonucu: <span id="barcode"></span></p>
         <div class="product-container">
@@ -27,12 +164,11 @@
         let scanner;
         let scanning = false;
 
-        // Kamera başlatma
         document.getElementById("start-btn").addEventListener("click", async function() {
             if (!scanning) {
                 try {
                     if (typeof Html5Qrcode === "undefined") {
-                        alert("Html5Qrcode kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.");
+                        alert("Kütüphane yüklenemedi. İnternet bağlantınızı kontrol edin.");
                         return;
                     }
 
@@ -40,7 +176,7 @@
                     const devices = await Html5Qrcode.getCameras();
                     if (devices && devices.length > 0) {
                         scanner.start(
-                            { facingMode: "environment" }, // Arka kamera öncelikli
+                            { facingMode: "environment" },
                             { fps: 10, qrbox: { width: 250, height: 250 } },
                             onScanSuccess,
                             onScanError
@@ -60,7 +196,6 @@
             }
         });
 
-        // Kamera durdurma
         document.getElementById("stop-btn").addEventListener("click", function() {
             if (scanning && scanner) {
                 scanner.stop().then(() => {
@@ -72,7 +207,6 @@
             }
         });
 
-        // Sıfırlama
         document.getElementById("reset-btn").addEventListener("click", function() {
             document.getElementById("barcode").innerText = "";
             document.getElementById("product-info").innerText = "";
@@ -80,21 +214,16 @@
             document.getElementById("reset-btn").style.display = "none";
         });
 
-        // Tarama başarılı olduğunda
         function onScanSuccess(decodedText, decodedResult) {
             document.getElementById("barcode").innerText = decodedText;
             fetchProductDetails(decodedText);
             document.getElementById("reset-btn").style.display = "inline-block";
         }
 
-        // Tarama hatası olduğunda
         function onScanError(errorMessage) {
             console.warn("Tarama hatası:", errorMessage);
-            // Kullanıcıya bilgi verebiliriz
-            // document.getElementById("result").innerText = "Tarama hatası: " + errorMessage;
         }
 
-        // Ürün bilgisi çekme
         function fetchProductDetails(barcode) {
             fetch("product.csv")
                 .then(response => {
@@ -107,11 +236,11 @@
                         let cols = rows[i].split(";");
                         if (cols[0].trim() === barcode.trim()) {
                             document.getElementById("product-info").innerHTML = `
-                                📦 <strong>Ürün:</strong> ${cols[1]} <br>
-                                📏 <strong>Ölçü:</strong> ${cols[2]} <br>
-                                💡 <strong>Ampül:</strong> ${cols[4]} <br>
-                                💰 <strong>dip.fiyat:</strong> ${cols[6]}₺ <br>
-                                💰 <strong>Fiyat:</strong> ${cols[7]}₺ <br>
+                                📦 <strong>Ürün:</strong> ${cols[1]}<br>
+                                📏 <strong>Ölçü:</strong> ${cols[2]}<br>
+                                💡 <strong>Ampül:</strong> ${cols[4]}<br>
+                                💰 <strong>Dip Fiyat:</strong> ${cols[6]}₺<br>
+                                💰 <strong>Fiyat:</strong> ${cols[7]}₺
                             `;
                             let imageUrl = `${barcode}.jpg`;
                             document.getElementById("barcode-image").src = imageUrl;
