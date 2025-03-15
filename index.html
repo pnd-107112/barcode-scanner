@@ -4,63 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pandora Aydınlatma | Barkod Tarama</title>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { 
-            background: #f9f9f9; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            padding: 20px;
-        }
-        .container { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 12px; 
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1); 
-            max-width: 400px; 
-            width: 100%; 
-            text-align: center; 
-        }
-        h2 { 
-            color: #333; 
-            margin-bottom: 15px; 
-            font-weight: 600; 
-        }
-        #scanner { 
-            width: 100%; 
-            max-width: 320px; 
-            margin: auto; 
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        p { color: #444; font-size: 14px; margin-top: 10px; }
-        .product-container { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 12px; 
-            margin-top: 15px;
-            padding: 10px; 
-            border-radius: 8px; 
-            background: #f7f7f7;
-        }
-        #product-image img { 
-            max-width: 120px; 
-            height: auto; 
-            border-radius: 8px; 
-            display: none; 
-            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
-        }
-        #result { font-weight: bold; margin-top: 12px; font-size: 16px; }
-        #product-info { font-size: 14px; color: #555; }
+        /* Stil kısmı aynı kalabilir */
     </style>
 </head>
 <body>
     <div class="container">
         <h2>📸 Pandora Barkod Tarama</h2>
+        <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
+        <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
+        <button id="reset-btn" class="btn-reset">🔄 Sıfırla</button>
         <div id="scanner"></div>
         <p id="result">Tarama Sonucu: <span id="barcode"></span></p>
         <div class="product-container">
@@ -70,49 +24,96 @@
     </div>
 
     <script>
-        let scanner = new Html5Qrcode("scanner"); // Scanner nesnesi oluştur
+        let scanner;
         let scanning = false;
 
-        function startScanner() {
+        // Kamera başlatma
+        document.getElementById("start-btn").addEventListener("click", async function() {
             if (!scanning) {
-                scanner.start(
-                    { facingMode: "environment" }, 
-                    { fps: 10, qrbox: 250 },
-                    onScanSuccess,
-                    onScanError
-                ).catch(err => console.error("Scanner başlatılamadı:", err));
+                try {
+                    if (typeof Html5Qrcode === "undefined") {
+                        alert("Html5Qrcode kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.");
+                        return;
+                    }
 
-                scanning = true;
+                    scanner = new Html5Qrcode("scanner");
+                    const devices = await Html5Qrcode.getCameras();
+                    if (devices && devices.length > 0) {
+                        scanner.start(
+                            { facingMode: "environment" }, // Arka kamera öncelikli
+                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            onScanSuccess,
+                            onScanError
+                        );
+                        scanning = true;
+                        document.getElementById("scanner").style.display = "block";
+                        document.getElementById("start-btn").style.display = "none";
+                        document.getElementById("stop-btn").style.display = "inline-block";
+                        document.getElementById("reset-btn").style.display = "inline-block";
+                    } else {
+                        alert("Cihazda kamera bulunamadı!");
+                    }
+                } catch (err) {
+                    console.error("Kamera başlatma hatası:", err);
+                    alert("Kamera başlatılamadı. İzin verdiğinizden ve HTTPS üzerinden çalıştığından emin olun.");
+                }
             }
-        }
+        });
 
-        function onScanSuccess(decodedText) {
+        // Kamera durdurma
+        document.getElementById("stop-btn").addEventListener("click", function() {
+            if (scanning && scanner) {
+                scanner.stop().then(() => {
+                    scanning = false;
+                    document.getElementById("scanner").style.display = "none";
+                    document.getElementById("start-btn").style.display = "inline-block";
+                    document.getElementById("stop-btn").style.display = "none";
+                }).catch(err => console.error("Durdurma başarısız:", err));
+            }
+        });
+
+        // Sıfırlama
+        document.getElementById("reset-btn").addEventListener("click", function() {
+            document.getElementById("barcode").innerText = "";
+            document.getElementById("product-info").innerText = "";
+            document.getElementById("barcode-image").style.display = "none";
+            document.getElementById("reset-btn").style.display = "none";
+        });
+
+        // Tarama başarılı olduğunda
+        function onScanSuccess(decodedText, decodedResult) {
             document.getElementById("barcode").innerText = decodedText;
             fetchProductDetails(decodedText);
+            document.getElementById("reset-btn").style.display = "inline-block";
         }
 
+        // Tarama hatası olduğunda
         function onScanError(errorMessage) {
-            console.warn("Scan error:", errorMessage);
+            console.warn("Tarama hatası:", errorMessage);
+            // Kullanıcıya bilgi verebiliriz
+            // document.getElementById("result").innerText = "Tarama hatası: " + errorMessage;
         }
 
+        // Ürün bilgisi çekme
         function fetchProductDetails(barcode) {
             fetch("product.csv")
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) throw new Error("CSV dosyası yüklenemedi!");
+                    return response.text();
+                })
                 .then(data => {
                     let rows = data.split("\n");
                     for (let i = 1; i < rows.length; i++) {
                         let cols = rows[i].split(";");
-
                         if (cols[0].trim() === barcode.trim()) {
                             document.getElementById("product-info").innerHTML = `
                                 📦 <strong>Ürün:</strong> ${cols[1]} <br>
                                 📏 <strong>Ölçü:</strong> ${cols[2]} <br>
                                 💡 <strong>Ampül:</strong> ${cols[4]} <br>
-                                💰 <strong>Dip Fiyat:</strong> ${cols[6]}₺ <br>
+                                💰 <strong>dip.fiyat:</strong> ${cols[6]}₺ <br>
                                 💰 <strong>Fiyat:</strong> ${cols[7]}₺ <br>
                             `;
-
-                            let imageUrl = `${barcode}.jpg`; 
+                            let imageUrl = `${barcode}.jpg`;
                             document.getElementById("barcode-image").src = imageUrl;
                             document.getElementById("barcode-image").style.display = "block";
                             return;
@@ -121,11 +122,11 @@
                     document.getElementById("product-info").innerText = "⚠ Ürün bulunamadı!";
                     document.getElementById("barcode-image").style.display = "none";
                 })
-                .catch(error => console.error("Error loading CSV:", error));
+                .catch(error => {
+                    console.error("CSV yükleme hatası:", error);
+                    document.getElementById("product-info").innerText = "⚠ Ürün bilgileri yüklenemedi!";
+                });
         }
-
-        // Sayfa açıldığında otomatik başlat
-        window.onload = startScanner;
     </script>
 </body>
 </html>
