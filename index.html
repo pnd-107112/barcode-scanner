@@ -1,321 +1,263 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pandora Aydınlatma | Barkod & QR Tarama</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { background: linear-gradient(135deg, #ece9e6, #ffffff); min-height: 100vh; display: grid; place-items: center; padding: 24px; }
-    .container { background: #fff; padding: 28px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.1); width: 100%; max-width: 780px; transition: transform .3s ease; }
-    .container:hover { transform: translateY(-4px); }
-    h1 { color: #2c3e50; font-size: 24px; font-weight: 700; margin-bottom: 10px; }
-    p.sub { color: #5d6d7e; margin-bottom: 18px; font-size: 14px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pandora Aydınlatma | Barkod Tarama</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
-    .controls { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin-bottom: 14px; }
-    .controls > * { width: 100%; }
+        body {
+            background: linear-gradient(135deg, #ece9e6, #ffffff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
 
-    select, button, input[type="file"] { padding: 10px 14px; border-radius: 12px; border: 1px solid #e1e7ec; background: #f8fafc; color: #2c3e50; font-weight: 600; cursor: pointer; }
-    button { border: none; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,.08); }
-    .btn-start { background: #1abc9c; }
-    .btn-start:hover { background: #16a085; }
-    .btn-stop { background: #e74c3c; display: none; }
-    .btn-stop:hover { background: #c0392b; }
-    .btn-reset { background: #3498db; display: none; }
-    .btn-reset:hover { background: #2980b9; }
-    .btn-torch { background: #f39c12; display: none; }
-    .btn-torch.active { filter: brightness(.9); }
+        .container:hover {
+            transform: translateY(-5px);
+        }
 
-    #scanner { width: 100%; max-width: 560px; margin: 0 auto 16px; display: none; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,.1); }
+        h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
 
-    #result { font-size: 15px; color: #2c3e50; margin: 8px 0 14px; font-weight: 600; }
-    #barcode { color: #e67e22; word-break: break-all; }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
 
-    .product-card { background: #f8f9fa; padding: 16px; border-radius: 16px; display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center; }
-    .product-card:hover { background: #eef2f5; }
-    .product-card img { width: 100%; height: auto; border-radius: 10px; display: none; box-shadow: 0 3px 8px rgba(0,0,0,.12); }
-    .product-info { font-size: 14px; color: #34495e; line-height: 1.55; }
-    .product-info strong { color: #2c3e50; }
+        button {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
 
-    .note { font-size: 12px; color: #6c7a89; margin-top: 8px; }
+        .btn-start {
+            background: #1abc9c;
+        }
+        .btn-start:hover {
+            background: #16a085;
+        }
 
-    @media (max-width: 640px){
-      .controls { grid-template-columns: 1fr; }
-      .product-card { grid-template-columns: 1fr; }
-    }
-  </style>
+        .btn-stop {
+            background: #e74c3c;
+            display: none;
+        }
+        .btn-stop:hover {
+            background: #c0392b;
+        }
+
+        .btn-reset {
+            background: #3498db;
+            display: none;
+        }
+        .btn-reset:hover {
+            background: #2980b9;
+        }
+
+        #scanner {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto 20px;
+            display: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #result {
+            font-size: 16px;
+            color: #2c3e50;
+            margin: 15px 0;
+        }
+
+        #barcode {
+            font-weight: 600;
+            color: #e67e22;
+        }
+
+        .product-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .product-container:hover {
+            background: #ecf0f1;
+        }
+        #product-image img { 
+            max-width: 120px; 
+            height: auto; 
+            border-radius: 8px; 
+            display: none; 
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+        }
+        #result { font-weight: bold; margin-top: 12px; font-size: 16px; }
+        #product-info { font-size: 14px; color: #555; }
+
+        }
+
+        #product-info {
+            font-size: 14px;
+            color: #34495e;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        #product-info strong {
+            color: #2c3e50;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📸 Pandora Barkod / QR Tarama</h1>
-    <p class="sub">Kamera izinlerini verdiğinizden ve sayfanın <strong>HTTPS</strong> üzerinden açıldığından emin olun. (GitHub Pages uygundur.)</p>
-
-    <div class="row">
-      <select id="camera-select" title="Kamera seçin"></select>
-      <input id="file-input" type="file" accept="image/*" title="Görselden tara" />
+    <div class="container">
+        <h2>📸 Pandora Barkod Tarama</h2>
+        <div class="button-group">
+            <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
+            <button id="stop-btn" class="btn-stop">⏹ Taramayı Durdur</button>
+            <button id="reset-btn" class="btn-reset">🔄 Yeniden Başlat</button>
+        </div>
+        <div id="scanner"></div>
+        <p id="result">Tarama Sonucu: <span id="barcode"></span></p>
+        <div class="product-container">
+            <div id="product-image"><img id="barcode-image" src="" alt="Ürün Resmi"></div>
+            <p id="product-info"></p>
+        </div>
     </div>
 
-    <div class="controls">
-      <button id="start-btn" class="btn-start">📷 Taramayı Başlat</button>
-      <button id="stop-btn" class="btn-stop">⏹ Durdur</button>
-      <button id="reset-btn" class="btn-reset">🔄 Yeniden Başlat</button>
-      <button id="torch-btn" class="btn-torch">🔦 El Feneri</button>
-    </div>
+    <script>
+        let scanner;
+        let scanning = false;
 
-    <div id="scanner"></div>
-    <p id="result">Tarama Sonucu: <span id="barcode"></span></p>
+        document.getElementById("start-btn").addEventListener("click", async function() {
+            if (!scanning) {
+                try {
+                    if (typeof Html5Qrcode === "undefined") {
+                        alert("Kütüphane yüklenemedi. İnternet bağlantınızı kontrol edin.");
+                        return;
+                    }
 
-    <div class="product-card">
-      <img id="barcode-image" alt="Ürün Resmi" />
-      <div class="product-info" id="product-info">Henüz bir ürün taranmadı.</div>
-    </div>
-
-    <p class="note">CSV dosyanızı <code>product.csv</code> adıyla bu HTML dosyasının olduğu klasöre koyun. Resim dosyalarını <code>{BARKOD}.jpg</code> veya <code>.png</code> olarak ekleyin.</p>
-  </div>
-
-  <audio id="beep" preload="auto">
-    <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" type="audio/ogg" />
-  </audio>
-
-  <script>
-    // ---------- Helpers ----------
-    const $ = (sel) => document.querySelector(sel);
-    const BASE_PATH = location.pathname.replace(/[^\/]+$/, ''); // current folder on GitHub Pages
-
-    function cacheBusted(url){
-      const sep = url.includes('?') ? '&' : '?';
-      return url + sep + 'v=' + Date.now();
-    }
-
-    function detectDelimiter(firstLine){
-      // prefer ; then ,
-      return firstLine.includes(';') ? ';' : ',';
-    }
-
-    function parseCSV(text){
-      const lines = text.trim().split(/\r?\n/);
-      if (!lines.length) return [];
-      const delim = detectDelimiter(lines[0]);
-      return lines.map(line => line.split(delim).map(s => s.trim()));
-    }
-
-    function setButtons({ scanning }){
-      $('#start-btn').style.display = scanning ? 'none' : 'inline-block';
-      $('#stop-btn').style.display = scanning ? 'inline-block' : 'none';
-      $('#reset-btn').style.display = 'inline-block';
-      $('#scanner').style.display = scanning ? 'block' : 'none';
-    }
-
-    // ---------- State ----------
-    let html5Scanner = null;
-    let scanning = false;
-    let lastDecoded = '';
-    let lastAt = 0;
-    let torchOn = false;
-    let selectedCameraId = null;
-    let csvRows = null; // cached
-
-    // ---------- Camera / Devices ----------
-    async function populateCameras(){
-      try {
-        const devices = await Html5Qrcode.getCameras();
-        const sel = $('#camera-select');
-        sel.innerHTML = '';
-        if (!devices || !devices.length){
-          const opt = document.createElement('option');
-          opt.textContent = 'Kamera bulunamadı';
-          sel.appendChild(opt);
-          sel.disabled = true;
-          return;
-        }
-        devices.forEach((d, i) => {
-          const opt = document.createElement('option');
-          opt.value = d.id;
-          opt.textContent = d.label || `Kamera ${i+1}`;
-          sel.appendChild(opt);
+                    scanner = new Html5Qrcode("scanner");
+                    const devices = await Html5Qrcode.getCameras();
+                    if (devices && devices.length > 0) {
+                        scanner.start(
+                            { facingMode: "environment" },
+                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            onScanSuccess,
+                            onScanError
+                        );
+                        scanning = true;
+                        document.getElementById("scanner").style.display = "block";
+                        document.getElementById("start-btn").style.display = "none";
+                        document.getElementById("stop-btn").style.display = "inline-block";
+                        document.getElementById("reset-btn").style.display = "inline-block";
+                    } else {
+                        alert("Cihazda kamera bulunamadı!");
+                    }
+                } catch (err) {
+                    console.error("Kamera başlatma hatası:", err);
+                    alert("Kamera başlatılamadı. İzin verdiğinizden ve HTTPS üzerinden çalıştığından emin olun.");
+                }
+            }
         });
-        // try to pick back camera by label if present
-        const back = devices.find(d => /back|arka|environment/i.test(d.label));
-        sel.value = back ? back.id : devices[0].id;
-        selectedCameraId = sel.value;
-        sel.addEventListener('change', e => { selectedCameraId = e.target.value; if (scanning) restartScanner(); });
-      } catch(e){
-        console.warn('Kameralar listelenemedi:', e);
-      }
-    }
 
-    async function startScanner(){
-      if (scanning) return;
-      if (typeof Html5Qrcode === 'undefined'){
-        alert('Kütüphane yüklenemedi. İnternet bağlantınızı kontrol edin.');
-        return;
-      }
-      html5Scanner = new Html5Qrcode('scanner');
-      try {
-        await html5Scanner.start(
-          selectedCameraId ? { deviceId: { exact: selectedCameraId } } : { facingMode: 'environment' },
-          { fps: 12, qrbox: { width: 280, height: 280 } },
-          onScanSuccess,
-          onScanError
-        );
-        scanning = true;
-        setButtons({ scanning: true });
-        updateTorchSupport();
-      } catch(err){
-        console.error('Kamera başlatma hatası:', err);
-        alert('Kamera başlatılamadı. İzin verdiğinizden ve HTTPS üzerinden çalıştığınızdan emin olun.');
-      }
-    }
+        document.getElementById("stop-btn").addEventListener("click", function() {
+            if (scanning && scanner) {
+                scanner.stop().then(() => {
+                    scanning = false;
+                    document.getElementById("scanner").style.display = "none";
+                    document.getElementById("start-btn").style.display = "inline-block";
+                    document.getElementById("stop-btn").style.display = "none";
+                }).catch(err => console.error("Durdurma başarısız:", err));
+            }
+        });
 
-    async function stopScanner(){
-      if (!scanning || !html5Scanner) return;
-      try { await html5Scanner.stop(); } catch(e){ console.warn('Durdurma hatası', e); }
-      scanning = false;
-      setButtons({ scanning: false });
-    }
+        document.getElementById("reset-btn").addEventListener("click", function() {
+            document.getElementById("barcode").innerText = "";
+            document.getElementById("product-info").innerText = "";
+            document.getElementById("barcode-image").style.display = "none";
+            document.getElementById("reset-btn").style.display = "none";
+        });
 
-    async function restartScanner(){
-      await stopScanner();
-      await startScanner();
-    }
-
-    // ---------- Torch (Flash) ----------
-    async function updateTorchSupport(){
-      const btn = $('#torch-btn');
-      try {
-        const track = html5Scanner.getState() === Html5QrcodeScannerState.SCANNING ? html5Scanner.getRunningTrack() : null;
-        const cap = track && track.getCapabilities ? track.getCapabilities() : null;
-        if (cap && 'torch' in cap){ btn.style.display = 'inline-block'; } else { btn.style.display = 'none'; }
-      } catch(e){ btn.style.display = 'none'; }
-    }
-
-    async function toggleTorch(){
-      try {
-        const track = html5Scanner.getRunningTrack();
-        torchOn = !torchOn;
-        await track.applyConstraints({ advanced: [{ torch: torchOn }] });
-        $('#torch-btn').classList.toggle('active', torchOn);
-      } catch(e){ console.warn('Torch desteklenmiyor:', e); }
-    }
-
-    // ---------- CSV ----------
-    async function ensureCsvLoaded(){
-      if (csvRows) return csvRows;
-      const url = cacheBusted(BASE_PATH + 'product.csv');
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('CSV dosyası yüklenemedi');
-      const text = await res.text();
-      csvRows = parseCSV(text);
-      return csvRows;
-    }
-
-    function lookupProduct(barcode){
-      if (!csvRows || csvRows.length < 2) return null;
-      // Varsayım: Kolonlar => 0:Barcode, 1:Ürün, 2:Ölçü, 3:??, 4:Ampül, 5:??, 6:Dip, 7:Fiyat
-      for (let i = 1; i < csvRows.length; i++){
-        const row = csvRows[i];
-        if (!row || !row.length) continue;
-        if ((row[0] || '').trim() === (barcode || '').trim()){
-          return {
-            barcode: row[0] || '',
-            name: row[1] || '',
-            size: row[2] || '',
-            bulb: row[4] || '',
-            basePrice: row[6] || '',
-            price: row[7] || ''
-          };
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById("barcode").innerText = decodedText;
+            fetchProductDetails(decodedText);
+            document.getElementById("reset-btn").style.display = "inline-block";
         }
-      }
-      return null;
-    }
 
-    function setProductUI(product){
-      const info = $('#product-info');
-      const img = $('#barcode-image');
-      if (!product){
-        info.textContent = '⚠ Ürün bulunamadı!';
-        img.style.display = 'none';
-        return;
-      }
-      info.innerHTML = `📦 <strong>Ürün:</strong> ${product.name}<br>
-                        📏 <strong>Ölçü:</strong> ${product.size}<br>
-                        💡 <strong>Ampül:</strong> ${product.bulb}<br>
-                        💰 <strong>Dip Fiyat:</strong> ${product.basePrice}₺<br>
-                        💰 <strong>Fiyat:</strong> ${product.price}₺`;
-      const tryPaths = [ `${product.barcode}.jpg`, `${product.barcode}.png` ].map(p => BASE_PATH + p);
-      let loaded = false;
-      for (const p of tryPaths){
-        const test = new Image();
-        test.onload = () => { if (!loaded){ loaded = true; img.src = p; img.style.display = 'block'; } };
-        test.onerror = () => {};
-        test.src = cacheBusted(p);
-      }
-      if (!loaded){ img.style.display = 'none'; }
-    }
+        function onScanError(errorMessage) {
+            console.warn("Tarama hatası:", errorMessage);
+        }
 
-    // ---------- Scanning callbacks ----------
-    async function onScanSuccess(decodedText){
-      // Debounce: aynı barkodu 1 sn içinde tekrar gösterme
-      const now = Date.now();
-      if (decodedText === lastDecoded && now - lastAt < 1000) return;
-      lastDecoded = decodedText; lastAt = now;
-      $('#barcode').textContent = decodedText;
-      $('#beep').currentTime = 0; $('#beep').play().catch(()=>{});
-      try {
-        await ensureCsvLoaded();
-        const product = lookupProduct(decodedText);
-        setProductUI(product);
-      } catch(e){
-        console.error('CSV yükleme/okuma hatası:', e);
-        $('#product-info').textContent = '⚠ Ürün bilgileri yüklenemedi!';
-      }
-    }
-
-    function onScanError(msg){
-      // Sessiz log; isterseniz konsola yazın
-      // console.warn('Tarama hatası:', msg);
-    }
-
-    // ---------- File input (image scan) ----------
-    $('#file-input').addEventListener('change', async (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const dataUrl = reader.result;
-          // html5-qrcode'nin static scan API'si
-          try {
-            const result = await Html5Qrcode.scanFileV2(file, /* showImage= */ false);
-            onScanSuccess(result.decodedText);
-          } catch(err){
-            alert('Görselden kod okunamadı. Lütfen daha net bir görsel deneyin.');
-          }
-        };
-        reader.readAsDataURL(file);
-      } catch(err){ console.error(err); }
-    });
-
-    // ---------- UI handlers ----------
-    $('#start-btn').addEventListener('click', startScanner);
-    $('#stop-btn').addEventListener('click', stopScanner);
-    $('#reset-btn').addEventListener('click', () => {
-      $('#barcode').textContent = '';
-      $('#product-info').textContent = 'Henüz bir ürün taranmadı.';
-      $('#barcode-image').style.display = 'none';
-      lastDecoded = ''; lastAt = 0;
-    });
-    $('#torch-btn').addEventListener('click', toggleTorch);
-
-    // Init
-    (async function init(){
-      await populateCameras();
-      // iOS/Safari için kullanıcı hareketi sonrası başlatmak en sağlıklısı
-    })();
-  </script>
+        function fetchProductDetails(barcode) {
+            fetch("product.csv")
+                .then(response => {
+                    if (!response.ok) throw new Error("CSV dosyası yüklenemedi!");
+                    return response.text();
+                })
+                .then(data => {
+                    let rows = data.split("\n");
+                    for (let i = 1; i < rows.length; i++) {
+                        let cols = rows[i].split(";");
+                        if (cols[0].trim() === barcode.trim()) {
+                            document.getElementById("product-info").innerHTML = 
+                                📦 <strong>Ürün:</strong> ${cols[1]}<br>
+                                📏 <strong>Ölçü:</strong> ${cols[2]}<br>
+                                💡 <strong>Ampül:</strong> ${cols[4]}<br>
+                                💰 <strong>Dip Fiyat:</strong> ${cols[6]}₺<br>
+                                💰 <strong>Fiyat:</strong> ${cols[7]}₺
+                            ;
+                            let imageUrl = ${barcode}.jpg;
+                            document.getElementById("barcode-image").src = imageUrl;
+                            document.getElementById("barcode-image").style.display = "block";
+                            return;
+                        }
+                    }
+                    document.getElementById("product-info").innerText = "⚠ Ürün bulunamadı!";
+                    document.getElementById("barcode-image").style.display = "none";
+                })
+                .catch(error => {
+                    console.error("CSV yükleme hatası:", error);
+                    document.getElementById("product-info").innerText = "⚠ Ürün bilgileri yüklenemedi!";
+                });
+        }
+    </script>
 </body>
 </html>
